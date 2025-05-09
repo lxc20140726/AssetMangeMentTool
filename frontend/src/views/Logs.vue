@@ -1,38 +1,27 @@
 <template>
   <div class="logs-container">
     <el-card class="filter-card">
-      <el-form :inline="true" :model="filterForm">
-        <el-form-item label="日志级别">
-          <el-select v-model="filterForm.level" placeholder="选择日志级别" @change="handleFilterChange">
-            <el-option label="全部" value="" />
-            <el-option label="错误" value="error" />
-            <el-option label="警告" value="warn" />
-            <el-option label="信息" value="info" />
-            <el-option label="调试" value="debug" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间范围">
-          <el-date-picker
-            v-model="filterForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            @change="handleFilterChange"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="filter-header">
+        <el-select
+          v-model="filterForm.level"
+          placeholder="选择日志级别"
+          @change="handleFilterChange"
+          class="level-select"
+        >
+          <el-option label="全部" value="" />
+          <el-option label="错误" value="error" />
+          <el-option label="警告" value="warn" />
+          <el-option label="信息" value="info" />
+          <el-option label="调试" value="debug" />
+        </el-select>
+        <el-button type="primary" @click="refreshLogs">刷新</el-button>
+      </div>
     </el-card>
 
     <el-card class="table-card">
       <template #header>
         <div class="card-header">
           <span>系统日志</span>
-          <el-button type="primary" @click="refreshLogs">刷新</el-button>
         </div>
       </template>
 
@@ -101,7 +90,6 @@ const currentLogDetails = ref<any>(null);
 
 const filterForm = ref({
   level: '',
-  dateRange: null as [Date, Date] | null,
 });
 
 const getLevelType = (level: string) => {
@@ -115,7 +103,40 @@ const getLevelType = (level: string) => {
 };
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleString();
+  try {
+    // 检查是否是 ISO 格式的时间戳
+    if (date.includes('T')) {
+      return new Date(date).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
+    
+    // 如果是数字时间戳
+    const timestamp = parseInt(date);
+    if (!isNaN(timestamp)) {
+      return new Date(timestamp).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
+    
+    // 如果都不是，返回原始值
+    return date;
+  } catch (error) {
+    console.error('Error formatting date:', date, error);
+    return date;
+  }
 };
 
 const showDetails = (log: LogEntry) => {
@@ -129,32 +150,19 @@ const fetchLogs = async () => {
     const response = await axios.get('/api/logs', {
       params: {
         level: filterForm.value.level,
-        startDate: filterForm.value.dateRange?.[0]?.toISOString(),
-        endDate: filterForm.value.dateRange?.[1]?.toISOString(),
       },
     });
     logs.value = response.data;
-  } catch (error) {
-    ElMessage.error('获取日志失败');
-    console.error('Error fetching logs:', error);
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.error || '获取日志失败';
+    const errorDetails = error.response?.data?.details || '';
+    ElMessage.error(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
   } finally {
     loading.value = false;
   }
 };
 
 const handleFilterChange = () => {
-  fetchLogs();
-};
-
-const handleSearch = () => {
-  fetchLogs();
-};
-
-const resetFilter = () => {
-  filterForm.value = {
-    level: '',
-    dateRange: null,
-  };
   fetchLogs();
 };
 
@@ -174,6 +182,17 @@ onMounted(() => {
 
 .filter-card {
   margin-bottom: 20px;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.level-select {
+  width: 200px;
 }
 
 .table-card {
