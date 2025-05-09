@@ -3,6 +3,7 @@ import cors from 'cors';
 import { logger } from './utils/logger';
 import { billsRouter } from './routes/bills';
 import { assetsRouter } from './routes/assets';
+import { logsRouter } from './routes/logs';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 // 路由
 app.use('/api/bills', billsRouter);
 app.use('/api/assets', assetsRouter);
+app.use('/api/logs', logsRouter);
 
 // 错误处理
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
