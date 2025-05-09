@@ -1,4 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import Bills from '../views/Bills.vue';
+import Import from '../views/Import.vue';
+import Analytics from '../views/Analytics.vue';
+import Forecast from '../views/Forecast.vue';
+import Assets from '../views/Assets.vue';
+import Logs from '../views/Logs.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,32 +16,32 @@ const router = createRouter({
     {
       path: '/bills',
       name: 'Bills',
-      component: () => import('../views/Bills.vue')
+      component: Bills
     },
     {
       path: '/import',
       name: 'Import',
-      component: () => import('../views/Import.vue')
+      component: Import
     },
     {
       path: '/analytics',
       name: 'Analytics',
-      component: () => import('../views/Analytics.vue')
+      component: Analytics
     },
     {
       path: '/forecast',
       name: 'Forecast',
-      component: () => import('../views/Forecast.vue')
+      component: Forecast
     },
     {
       path: '/assets',
       name: 'Assets',
-      component: () => import('../views/Assets.vue')
+      component: Assets
     },
     {
-      path: '/assets/:id',
-      name: 'AssetDetail',
-      component: () => import('../views/AssetDetail.vue')
+      path: '/logs',
+      name: 'Logs',
+      component: Logs
     }
   ]
 });

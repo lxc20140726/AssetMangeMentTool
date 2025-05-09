@@ -22,6 +22,9 @@ const handleSelect = (key: string) => {
     case '5':
       router.push('/assets')
       break
+    case '6':
+      router.push('/logs')
+      break
   }
 }
 </script>
@@ -40,6 +43,7 @@ const handleSelect = (key: string) => {
         <el-menu-item index="3">数据分析</el-menu-item>
         <el-menu-item index="4">支出预测</el-menu-item>
         <el-menu-item index="5">资产管理</el-menu-item>
+        <el-menu-item index="6">系统日志</el-menu-item>
       </el-menu>
     </el-header>
     <el-main>
