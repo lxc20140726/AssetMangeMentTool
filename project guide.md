@@ -157,15 +157,15 @@ backend/
 
 ### 部署步骤
 1. 前端部署
-   ```bash
-   cd frontend
-   npm install
+```bash
+cd frontend
+npm install
    npm run build
-   ```
+```
 
 2. 后端部署
-   ```bash
-   cd backend
+```bash
+cd backend
    pip install -r requirements.txt
    python app.py
    ```
