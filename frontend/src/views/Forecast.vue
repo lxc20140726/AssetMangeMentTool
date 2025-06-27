@@ -1,45 +1,46 @@
 <template>
   <div class="forecast-container">
-    <el-row :gutter="20">
-      <el-col :span="24">
-        <el-card class="chart-card">
+    <n-grid :cols="1" :x-gap="20">
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>支出预测</span>
-              <el-select v-model="forecastPeriod" placeholder="选择预测周期" @change="handlePeriodChange">
-                <el-option label="未来3个月" value="3" />
-                <el-option label="未来6个月" value="6" />
-                <el-option label="未来12个月" value="12" />
-              </el-select>
-            </div>
+              <n-select
+                v-model:value="forecastPeriod"
+                placeholder="选择预测周期"
+                :options="periodOptions"
+                @update:value="handlePeriodChange"
+              />
+            </n-space>
           </template>
           <div ref="forecastChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </n-card>
+      </n-grid-item>
+    </n-grid>
 
-    <el-row :gutter="20" class="mt-20">
-      <el-col :span="12">
-        <el-card class="chart-card">
+    <n-grid :cols="2" :x-gap="20" class="mt-20">
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>分类预测</span>
-            </div>
+            </n-space>
           </template>
           <div ref="categoryForecastChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="chart-card">
+        </n-card>
+      </n-grid-item>
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>资产增长预测</span>
-            </div>
+            </n-space>
           </template>
           <div ref="assetForecastChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </n-card>
+      </n-grid-item>
+    </n-grid>
   </div>
 </template>
 
@@ -52,6 +53,12 @@ import { useAssetsStore } from '../stores/assets';
 const billsStore = useBillsStore();
 const assetsStore = useAssetsStore();
 const forecastPeriod = ref('3');
+
+const periodOptions = [
+  { label: '未来3个月', value: '3' },
+  { label: '未来6个月', value: '6' },
+  { label: '未来12个月', value: '12' }
+];
 
 const forecastChartRef = ref<HTMLElement | null>(null);
 const categoryForecastChartRef = ref<HTMLElement | null>(null);
@@ -219,12 +226,6 @@ const updateAssetForecastChart = () => {
 
 .chart-card {
   margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .chart {

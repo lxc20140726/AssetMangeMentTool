@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const activeIndex = ref('1')
+const activeKey = ref('1')
 
-const handleSelect = (key: string) => {
+const handleUpdateValue = (key: string) => {
+  activeKey.value = key
   switch (key) {
     case '1':
       router.push('/bills')
@@ -30,26 +31,34 @@ const handleSelect = (key: string) => {
 </script>
 
 <template>
-  <el-container class="layout-container">
-    <el-header>
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">账单管理</el-menu-item>
-        <el-menu-item index="2">导入账单</el-menu-item>
-        <el-menu-item index="3">数据分析</el-menu-item>
-        <el-menu-item index="4">支出预测</el-menu-item>
-        <el-menu-item index="5">资产管理</el-menu-item>
-        <el-menu-item index="6">系统日志</el-menu-item>
-      </el-menu>
-    </el-header>
-    <el-main>
-      <router-view />
-    </el-main>
-  </el-container>
+  <n-config-provider>
+    <n-message-provider>
+      <n-dialog-provider>
+        <n-notification-provider>
+          <n-layout class="layout-container">
+            <n-layout-header class="header" bordered>
+              <n-menu
+                mode="horizontal"
+                :value="activeKey"
+                :on-update:value="handleUpdateValue"
+                :options="[
+                  { label: '账单管理', key: '1' },
+                  { label: '导入账单', key: '2' },
+                  { label: '数据分析', key: '3' },
+                  { label: '支出预测', key: '4' },
+                  { label: '资产管理', key: '5' },
+                  { label: '系统日志', key: '6' }
+                ]"
+              />
+            </n-layout-header>
+            <n-layout-content class="main-content">
+              <router-view />
+            </n-layout-content>
+          </n-layout>
+        </n-notification-provider>
+      </n-dialog-provider>
+    </n-message-provider>
+  </n-config-provider>
 </template>
 
 <style scoped>
@@ -57,16 +66,13 @@ const handleSelect = (key: string) => {
   min-height: 100vh;
 }
 
-.el-header {
-  padding: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.el-menu-demo {
+.header {
   padding: 0 20px;
+  display: flex;
+  align-items: center;
 }
 
-.el-main {
+.main-content {
   background-color: #f5f7fa;
   padding: 20px;
 }

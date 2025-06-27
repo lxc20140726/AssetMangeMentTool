@@ -1,67 +1,44 @@
 <template>
   <div class="bills-container">
-    <el-card class="filter-card">
-      <el-form :inline="true" :model="filterForm">
-        <el-form-item label="日期范围">
-          <el-date-picker
-            v-model="filterForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            @change="handleDateRangeChange"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <n-card class="filter-card">
+      <n-space :size="16" align="center">
+        <n-date-picker
+          v-model:value="filterForm.dateRange"
+          type="daterange"
+          :separator="' 至 '"
+          :start-placeholder="'开始日期'"
+          :end-placeholder="'结束日期'"
+          @update:value="handleDateRangeChange"
+        />
+        <n-button type="primary" @click="handleSearch">查询</n-button>
+        <n-button @click="resetFilter">重置</n-button>
+      </n-space>
+    </n-card>
 
-    <el-card class="table-card">
+    <n-card class="table-card">
       <template #header>
-        <div class="card-header">
+        <n-space justify="space-between" align="center">
           <span>账单列表</span>
-          <el-button type="primary" @click="router.push('/import')">导入账单</el-button>
-        </div>
+          <n-button type="primary" @click="router.push('/import')">导入账单</n-button>
+        </n-space>
       </template>
 
-      <el-table
-        v-loading="billsStore.loading"
+      <n-data-table
+        :loading="billsStore.loading"
+        :columns="columns"
         :data="billsStore.bills"
-        style="width: 100%"
-      >
-        <el-table-column prop="date" label="日期" width="180" />
-        <el-table-column prop="category" label="分类" width="120" />
-        <el-table-column prop="amount" label="金额" width="120">
-          <template #default="{ row }">
-            {{ row.amount.toFixed(2) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述" />
-        <el-table-column prop="tags" label="标签" width="150">
-          <template #default="{ row }">
-            <el-tag
-              v-for="tag in row.tags?.split(',')"
-              :key="tag"
-              class="mx-1"
-              size="small"
-            >
-              {{ tag }}
-            </el-tag>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+        :pagination="false"
+      />
+    </n-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBillsStore } from '../stores/bills';
-import { ElMessage } from 'element-plus';
+import { NTag } from 'naive-ui';
+import type { DataTableColumns } from 'naive-ui';
 
 interface Bill {
   id: number;
@@ -75,14 +52,50 @@ interface Bill {
 const router = useRouter();
 const billsStore = useBillsStore();
 const filterForm = ref({
-  dateRange: null as [Date, Date] | null
+  dateRange: null as [number, number] | null
 });
+
+const columns: DataTableColumns<Bill> = [
+  {
+    title: '日期',
+    key: 'date',
+    width: 180
+  },
+  {
+    title: '分类',
+    key: 'category',
+    width: 120
+  },
+  {
+    title: '金额',
+    key: 'amount',
+    width: 120,
+    render(row) {
+      return row.amount.toFixed(2);
+    }
+  },
+  {
+    title: '描述',
+    key: 'description'
+  },
+  {
+    title: '标签',
+    key: 'tags',
+    width: 150,
+    render(row) {
+      if (!row.tags) return '';
+      return row.tags.split(',').map(tag => 
+        h(NTag, { size: 'small', style: 'margin-right: 4px;' }, { default: () => tag })
+      );
+    }
+  }
+];
 
 onMounted(async () => {
   await billsStore.fetchBills();
 });
 
-const handleDateRangeChange = (val: [Date, Date] | null) => {
+const handleDateRangeChange = (val: [number, number] | null) => {
   filterForm.value.dateRange = val;
 };
 
@@ -94,8 +107,8 @@ const handleSearch = async () => {
 
   const [startDate, endDate] = filterForm.value.dateRange;
   await billsStore.fetchBillsByDateRange(
-    startDate.toISOString().split('T')[0],
-    endDate.toISOString().split('T')[0]
+    new Date(startDate).toISOString().split('T')[0],
+    new Date(endDate).toISOString().split('T')[0]
   );
 };
 
@@ -116,15 +129,5 @@ const resetFilter = () => {
 
 .table-card {
   margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mx-1 {
-  margin: 0 4px;
 }
 </style> 

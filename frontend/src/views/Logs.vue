@@ -1,79 +1,48 @@
 <template>
   <div class="logs-container">
-    <el-card class="filter-card">
-      <div class="filter-header">
-        <el-select
-          v-model="filterForm.level"
+    <n-card class="filter-card">
+      <n-space justify="space-between" align="center">
+        <n-select
+          v-model:value="filterForm.level"
           placeholder="选择日志级别"
-          @change="handleFilterChange"
-          class="level-select"
-        >
-          <el-option label="全部" value="" />
-          <el-option label="错误" value="error" />
-          <el-option label="警告" value="warn" />
-          <el-option label="信息" value="info" />
-          <el-option label="调试" value="debug" />
-        </el-select>
-        <el-button type="primary" @click="refreshLogs">刷新</el-button>
-      </div>
-    </el-card>
+          :options="levelOptions"
+          @update:value="handleFilterChange"
+          style="width: 200px"
+        />
+        <n-button type="primary" @click="refreshLogs">刷新</n-button>
+      </n-space>
+    </n-card>
 
-    <el-card class="table-card">
+    <n-card class="table-card">
       <template #header>
-        <div class="card-header">
+        <n-space justify="space-between" align="center">
           <span>系统日志</span>
-        </div>
+        </n-space>
       </template>
 
-      <el-table
-        v-loading="loading"
+      <n-data-table
+        :loading="loading"
+        :columns="columns"
         :data="logs"
-        style="width: 100%"
-      >
-        <el-table-column prop="timestamp" label="时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.timestamp) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="level" label="级别" width="100">
-          <template #default="{ row }">
-            <el-tag
-              :type="getLevelType(row.level)"
-              size="small"
-            >
-              {{ row.level.toUpperCase() }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="message" label="消息" />
-        <el-table-column prop="details" label="详情" width="200">
-          <template #default="{ row }">
-            <el-button
-              v-if="row.details"
-              type="primary"
-              link
-              @click="showDetails(row)"
-            >
-              查看详情
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+        :pagination="false"
+      />
+    </n-card>
 
-    <el-dialog
-      v-model="detailsDialogVisible"
+    <n-modal
+      v-model:show="detailsDialogVisible"
+      preset="card"
       title="日志详情"
-      width="50%"
+      style="width: 50%"
     >
       <pre>{{ JSON.stringify(currentLogDetails, null, 2) }}</pre>
-    </el-dialog>
+    </n-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, onMounted, h } from 'vue';
+import { useMessage, NTag, NButton } from 'naive-ui';
+import type { DataTableColumns } from 'naive-ui';
 import axios from 'axios';
 
 interface LogEntry {
@@ -87,14 +56,23 @@ const loading = ref(false);
 const logs = ref<LogEntry[]>([]);
 const detailsDialogVisible = ref(false);
 const currentLogDetails = ref<any>(null);
+const message = useMessage();
 
 const filterForm = ref({
   level: '',
 });
 
+const levelOptions = [
+  { label: '全部', value: '' },
+  { label: '错误', value: 'error' },
+  { label: '警告', value: 'warn' },
+  { label: '信息', value: 'info' },
+  { label: '调试', value: 'debug' }
+];
+
 const getLevelType = (level: string) => {
-  const types: Record<string, string> = {
-    error: 'danger',
+  const types: Record<string, 'error' | 'warning' | 'info' | 'success'> = {
+    error: 'error',
     warn: 'warning',
     info: 'info',
     debug: 'success',
@@ -144,6 +122,45 @@ const showDetails = (log: LogEntry) => {
   detailsDialogVisible.value = true;
 };
 
+const columns: DataTableColumns<LogEntry> = [
+  {
+    title: '时间',
+    key: 'timestamp',
+    width: 180,
+    render(row) {
+      return formatDate(row.timestamp);
+    }
+  },
+  {
+    title: '级别',
+    key: 'level',
+    width: 100,
+    render(row) {
+      return h(NTag, {
+        type: getLevelType(row.level),
+        size: 'small'
+      }, { default: () => row.level.toUpperCase() });
+    }
+  },
+  {
+    title: '消息',
+    key: 'message'
+  },
+  {
+    title: '详情',
+    key: 'details',
+    width: 200,
+    render(row) {
+      if (!row.details) return '';
+      return h(NButton, {
+        type: 'primary',
+        text: true,
+        onClick: () => showDetails(row)
+      }, { default: () => '查看详情' });
+    }
+  }
+];
+
 const fetchLogs = async () => {
   try {
     loading.value = true;
@@ -156,7 +173,7 @@ const fetchLogs = async () => {
   } catch (error: any) {
     const errorMessage = error.response?.data?.error || '获取日志失败';
     const errorDetails = error.response?.data?.details || '';
-    ElMessage.error(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
+    message.error(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
   } finally {
     loading.value = false;
   }
@@ -184,25 +201,8 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.level-select {
-  width: 200px;
-}
-
 .table-card {
   margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 pre {

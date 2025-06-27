@@ -7,34 +7,41 @@ const count = ref(0)
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
+  <n-h1>{{ msg }}</n-h1>
 
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
-  </div>
+  <n-card class="card">
+    <n-button type="primary" @click="count++">
+      计数是 {{ count }}
+    </n-button>
+    <n-p>
+      编辑
+      <n-text code>components/HelloWorld.vue</n-text> 来测试 HMR
+    </n-p>
+  </n-card>
 
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Learn more about IDE Support for Vue in the
-    <a
+  <n-p>
+    查看
+    <n-a href="https://vuejs.org/guide/quick-start.html#local" target="_blank">
+      create-vue
+    </n-a>，官方的 Vue + Vite 启动模板
+  </n-p>
+  <n-p>
+    了解更多关于 Vue 的 IDE 支持
+    <n-a
       href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
       target="_blank"
-      >Vue Docs Scaling up Guide</a
-    >.
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+    >
+      Vue 文档扩展指南
+    </n-a>。
+  </n-p>
+  <n-p class="read-the-docs">点击 Vite 和 Vue 图标了解更多</n-p>
 </template>
 
 <style scoped>
+.card {
+  margin: 2em 0;
+}
+
 .read-the-docs {
   color: #888;
 }

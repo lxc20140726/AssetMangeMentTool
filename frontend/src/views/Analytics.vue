@@ -1,48 +1,48 @@
 <template>
   <div class="analytics-container">
-    <el-row :gutter="20">
-      <el-col :span="24">
-        <el-card class="chart-card">
+    <n-grid :cols="1" :x-gap="20">
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>支出分类统计</span>
-              <el-date-picker
-                v-model="dateRange"
+              <n-date-picker
+                v-model:value="dateRange"
                 type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                @change="handleDateRangeChange"
+                :separator="' 至 '"
+                :start-placeholder="'开始日期'"
+                :end-placeholder="'结束日期'"
+                @update:value="handleDateRangeChange"
               />
-            </div>
+            </n-space>
           </template>
           <div ref="categoryChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </n-card>
+      </n-grid-item>
+    </n-grid>
 
-    <el-row :gutter="20" class="mt-20">
-      <el-col :span="12">
-        <el-card class="chart-card">
+    <n-grid :cols="2" :x-gap="20" class="mt-20">
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>月度支出趋势</span>
-            </div>
+            </n-space>
           </template>
           <div ref="trendChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="chart-card">
+        </n-card>
+      </n-grid-item>
+      <n-grid-item>
+        <n-card class="chart-card">
           <template #header>
-            <div class="card-header">
+            <n-space justify="space-between" align="center">
               <span>资产分布</span>
-            </div>
+            </n-space>
           </template>
           <div ref="assetChartRef" class="chart"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </n-card>
+      </n-grid-item>
+    </n-grid>
   </div>
 </template>
 
@@ -54,7 +54,7 @@ import { useAssetsStore } from '../stores/assets';
 
 const billsStore = useBillsStore();
 const assetsStore = useAssetsStore();
-const dateRange = ref<[Date, Date] | null>(null);
+const dateRange = ref<[number, number] | null>(null);
 
 const categoryChartRef = ref<HTMLElement | null>(null);
 const trendChartRef = ref<HTMLElement | null>(null);
@@ -101,12 +101,12 @@ const handleResize = () => {
   assetChart?.resize();
 };
 
-const handleDateRangeChange = async () => {
-  if (dateRange.value) {
-    const [startDate, endDate] = dateRange.value;
+const handleDateRangeChange = async (val: [number, number] | null) => {
+  if (val) {
+    const [startDate, endDate] = val;
     await billsStore.fetchBillsByDateRange(
-      startDate.toISOString().split('T')[0],
-      endDate.toISOString().split('T')[0]
+      new Date(startDate).toISOString().split('T')[0],
+      new Date(endDate).toISOString().split('T')[0]
     );
     updateCategoryChart();
     updateTrendChart();
@@ -203,12 +203,6 @@ const updateAssetChart = () => {
 
 .chart-card {
   margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .chart {

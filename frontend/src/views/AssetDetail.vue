@@ -1,20 +1,20 @@
 <template>
   <div class="asset-detail-container">
-    <el-card v-loading="loading">
+    <n-card :loading="loading">
       <template #header>
-        <div class="card-header">
+        <n-space justify="space-between" align="center">
           <span>资产详情</span>
-          <el-button @click="router.back()">返回</el-button>
-        </div>
+          <n-button @click="router.back()">返回</n-button>
+        </n-space>
       </template>
 
       <div v-if="asset" class="asset-info">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="名称">{{ asset.name }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ asset.type }}</el-descriptions-item>
-          <el-descriptions-item label="金额">{{ asset.amount.toFixed(2) }}</el-descriptions-item>
-          <el-descriptions-item label="最后更新">{{ asset.last_updated }}</el-descriptions-item>
-        </el-descriptions>
+        <n-descriptions :column="2" bordered>
+          <n-descriptions-item label="名称">{{ asset.name }}</n-descriptions-item>
+          <n-descriptions-item label="类型">{{ asset.type }}</n-descriptions-item>
+          <n-descriptions-item label="金额">{{ asset.amount.toFixed(2) }}</n-descriptions-item>
+          <n-descriptions-item label="最后更新">{{ asset.last_updated }}</n-descriptions-item>
+        </n-descriptions>
 
         <div class="chart-container">
           <div ref="historyChartRef" class="chart"></div>
@@ -22,9 +22,9 @@
       </div>
 
       <div v-else class="no-data">
-        <el-empty description="未找到资产信息" />
+        <n-empty description="未找到资产信息" />
       </div>
-    </el-card>
+    </n-card>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import * as echarts from 'echarts';
 import { useAssetsStore } from '../stores/assets';
-import { ElMessage } from 'element-plus';
+import { useMessage } from 'naive-ui';
 
 interface Asset {
   id: number;
@@ -46,6 +46,7 @@ interface Asset {
 const route = useRoute();
 const router = useRouter();
 const assetsStore = useAssetsStore();
+const message = useMessage();
 const loading = ref(true);
 const asset = ref<Asset | null>(null);
 const historyChartRef = ref<HTMLElement | null>(null);
@@ -62,7 +63,7 @@ onMounted(async () => {
       updateHistoryChart();
     }
   } catch (error) {
-    ElMessage.error('获取资产详情失败');
+    message.error('获取资产详情失败');
   } finally {
     loading.value = false;
   }
@@ -122,12 +123,6 @@ const updateHistoryChart = () => {
 <style scoped>
 .asset-detail-container {
   padding: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .asset-info {
